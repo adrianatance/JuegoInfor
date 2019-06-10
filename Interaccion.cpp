@@ -14,6 +14,9 @@ void Interaccion::rebote(Hombre &h, Caja c)
 {
 	float xmax=c.suelo.limite2.x;
 	float xmin=c.suelo.limite1.x;
+
+	float ymin = c.pared_dcha.limite1.y;
+
 	if(h.posicion.x>xmax){
 		h.posicion.x=xmax;
 		h.velocidad.x=0;
@@ -22,7 +25,25 @@ void Interaccion::rebote(Hombre &h, Caja c)
 		h.posicion.x=xmin;
 		h.velocidad.x=0;
 	}
+	if (h.posicion.y < ymin) h.posicion.y = ymin;
 }
+
+void Interaccion::rebote(Hombre& h, Pared plataforma) {
+	float ymax = plataforma.limite1.y;
+	if ((h.getPosX() > plataforma.limite1.x) && (h.getPosX() < plataforma.limite2.x)) {
+		if (((ymax - h.getPosY()) < 0.4) && ((ymax - h.getPosY()) > 0.1)) {
+			h.setVelY(0.0);
+		}
+	}
+	if ((h.getPosX() > plataforma.limite1.x) && (h.getPosX() < plataforma.limite2.x)) {
+		if ((ymax < h.getPosY())&&(h.getPosY()<(ymax+0.2))) {
+			h.setVelY(0.0);
+			h.setPosY(ymax + 0.1);
+		}
+	}
+}
+
+
 void Interaccion::rebote(Esfera& e, Caja c)
 {
 	rebote(e,c.suelo);
@@ -43,7 +64,20 @@ bool Interaccion::rebote(Esfera &e, Pared p)
 		}
 	return false;
 }
-
+void Interaccion::rebote(Hombre&h,Pared*p) {
+	float ymax =p->limite1.y;
+	if ((h.getPosX() > p->limite1.x) && (h.getPosX() < p->limite2.x)) {
+		if (((ymax - h.getPosY()) < 0.4) && ((ymax - h.getPosY()) > 0.1)) {
+			h.setVelY(0.0);
+		}
+	}
+	if ((h.getPosX() > p->limite1.x) && (h.getPosX() < p->limite2.x)) {
+		if ((ymax < h.getPosY()) && (h.getPosY() < (ymax + 0.2))) {
+			h.setVelY(0.0);
+			h.setPosY(ymax + 0.1);
+		}
+	}
+}
 bool Interaccion::rebote(Esfera &esfera1, Esfera &esfera2)
 {
 	//Vector que une los centros
@@ -153,4 +187,39 @@ bool Interaccion::colision(Disparo d, Esfera e)
 	if (dist < e.radio)
 		return true;
 	return false;
+}
+bool Interaccion::colision(ObjetoAtaca o, Hombre h)
+{
+	Vector2D pos = h.getPos(); //la posicion del hombre de la base
+	pos.y += h.getAltura() / 2.0f; //posicion del centro
+
+	float distancia = (o.posicion - pos).modulo();
+	if (distancia < o.lado)
+		return true;
+	return false;
+}
+bool Interaccion::colision(ObjetoAtaca *o, Pared p) {
+	if ((o->getPosY() < (p.getLimiteY2() + 0.2)) || (o->getPosY() > (p.getLimiteY2() - 0.2))) {
+		if ((o->getPosX() - p.getLimiteX2()) < 0.1) {
+			return true;
+		}
+	}
+	return false;
+}
+/*void Interaccion::rebote(ObjetoAtaca *o, Pared *p) {
+	float ymax = p->limite1.y;
+	if ((o->getPos.x() > p->limite1.x) && (o->getPos.x() < p->limite2.x)) {
+		if (((ymax - o->getPos.x()) < 0.4) && ((ymax - o->getPos.x()) > 0.1)) {
+			o->setVel.y(0.0);
+		}
+	}
+	if ((o->getPos.x() > p->limite1.x) && (o->getPos.x() < p->limite2.x)) {
+		if ((ymax < o->getPos.y()) && (o->getPos.y() < (ymax + 0.2))) {
+			o->setVel.y(0.0);
+			o->setPos.y(ymax + 0.1);
+		}
+	}
+}*/
+ bool Interaccion::colision(ObjetoAtaca* o, Caja c){
+	 return colision(o, c.pared_dcha);
 }

@@ -13,6 +13,6 @@ public:
 	Mundo Mundo;
 
 protected:
-	enum Estado {INICIO, JUEGO, GAMEOVER, FIN, PAUSA};
+	enum Estado {INICIO, JUEGO, BOSS, GAMEOVER, FIN, PAUSA};
 	Estado estado;
 };

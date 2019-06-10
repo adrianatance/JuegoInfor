@@ -1,5 +1,5 @@
 #include "ListaPlataformas.h"
-
+#include "Interaccion.h"
 
 
 ListaPlataformas::ListaPlataformas()
@@ -35,4 +35,9 @@ Pared *ListaPlataformas::operator [](int i)
 		i = 0;
 
 	return Lista[i];
+}
+void ListaPlataformas::rebote(Hombre &h, Pared *Lista)
+{
+	for (int i = 0; i < numero; i++)
+		Interaccion::rebote(h, *Lista);
 }
