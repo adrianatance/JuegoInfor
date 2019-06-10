@@ -4,20 +4,15 @@
 #include "Esfera.h"	
 #include "Bonus.h"	
 #include "Disparo.h"
-#include "ListaEsferas.h"	
-#include "ListaDisparos.h"	
+#include "ListaEsferas.h"		
 #include "EsferaPulsante.h"
-#include "DisparoEspecial.h"
 
 class Mundo
 {
 	friend class CoordinadorPang;
 
 	EsferaPulsante esfera_pulsante;
-	DisparoEspecial disparo_especial;
-
 	ListaEsferas esferas;
-	ListaDisparos disparos;
 	Hombre hombre;
 	Caja caja;
 	Bonus bonus;
@@ -36,8 +31,11 @@ public:
 	void rotarOjo();
 	void mueve();
 	void dibuja();
-	bool getImpacto() { return impacto; }
-	int getNumEsferas() { return esferas.getNumero(); }
+	bool getImpacto() { return impacto; };
+	void resetImpacto() { impacto = false; };
+	int getNumEsferas() { return esferas.getNumero(); };
 	bool cargarNivel();
+	float Ojo(Hombre h);
+	float getOjoX() { return hombre.getPosX(); };
 
 };

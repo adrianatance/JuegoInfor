@@ -6,7 +6,6 @@
 Mundo::~Mundo()
 {
 	esferas.destruirContenido();
-	disparos.destruirContenido();
 }
 
 void Mundo::rotarOjo()
@@ -17,27 +16,34 @@ void Mundo::rotarOjo()
 	x_ojo=dist*cos(ang);
 	z_ojo=dist*sin(ang);
 }
+
+float Mundo::Ojo(Hombre h) {
+	float ojoX; //la posicion x del ojo;
+	if (h.getPosX() < (0.0f)) return 0.0f;
+	if (h.getPosX() > 90.0f) return 90.0f;
+	return h.getPosX();
+}
+
 void Mundo::dibuja()
 {
-	gluLookAt(x_ojo, y_ojo, z_ojo,  // posicion del ojo
-			0.0, y_ojo, 0.0,      // hacia que punto mira  (0,0,0) 
+	gluLookAt(Ojo(hombre), y_ojo, z_ojo,  // posicion del ojo
+			Ojo(hombre), y_ojo, 0.0,      // hacia que punto mira  (0,0,0) 
 			0.0, 1.0, 0.0);      // definimos hacia arriba (eje Y)    
 
 	//aqui es donde hay que poner el codigo de dibujo
 	caja.dibuja();
 	hombre.dibuja();
-	disparos.dibuja();
 	plataforma.dibuja();
 	bonus.dibuja();
 	esferas.dibuja();
 
 	ETSIDI::setTextColor(1,1,0);
 	ETSIDI::setFont("fuentes/Bitwise.ttf",16);
-	ETSIDI::printxy("Pang AAM", -10,17);
+	ETSIDI::printxy("Pang AAM",-10,17);
 	
 	ETSIDI::setTextColor(1,1,1);
 	ETSIDI::setFont("fuentes/Bitwise.ttf",12);
-	ETSIDI::printxy("ADRIAN ATANCE",-10,16.4);
+	ETSIDI::printxy("ATANCE, BAREA, DERKACH",-10,16.4);
 }
 
 void Mundo::mueve()
@@ -46,34 +52,15 @@ void Mundo::mueve()
 	hombre.mueve(0.025f);
 	bonus.mueve(0.025f);
 
-	disparos.mueve(0.025f);
-	disparos.colision(caja);
-	disparos.colision(plataforma);
-
 	esferas.mueve(0.025f);
 	esferas.rebote();
 	esferas.rebote(plataforma);
 	esferas.rebote(caja);
 
 	Interaccion::rebote(hombre,caja);
+	Interaccion::rebote(hombre, plataforma);
 
-	for (int i = 0; i < esferas.getNumero(); i++)
-	{
-		for (int j = 0; j < disparos.getNumero(); j++)
-		{
-			if (Interaccion::colision(*disparos[j], *esferas[i]))
-			{
-				disparos.eliminar(disparos[j]);
-				Esfera* e = esferas[i]->dividir();
-				if (e == 0) //no division
-					esferas.eliminar(esferas[i]);
-				else
-					esferas.agregar(e);
-				ETSIDI::play("sonidos/impacto.wav");
-				break;
-			}
-		}
-	}
+	
 	Esfera *aux1 = esferas.colision(hombre);
 	if (aux1 != 0) impacto = true;
 }
@@ -86,7 +73,6 @@ void Mundo::inicializa()
 	impacto = false;
 	hombre.setPos(0, 0);
 	esferas.destruirContenido();
-	disparos.destruirContenido();
 
 	//Creación del nuevo mundo
 
@@ -99,11 +85,11 @@ void Mundo::inicializa()
 	bonus.setPos(5.0f,5.0f);
 	plataforma.setPos(-5.0f,9.0f,5.0f,9.0f);
 
-	Esfera *e1=new Esfera(1.5f,2,4,5,15);
+	Esfera *e1=new Esfera(1.5f,56,4,5,15);
 	e1->setColor(0,0,255);
 	esferas.agregar(e1); //esfera
 
-	Esfera *e2=new Esfera(2,-2,4,-5,15);
+	Esfera *e2=new Esfera(2,-2,58,-5,15);
 	e2->setColor(255,255,255);
 	esferas.agregar(e2); //esfera2
 
@@ -117,26 +103,6 @@ void Mundo::tecla(unsigned char key)
 {
 		switch(key)
 	{
-		case ' ':
-			{
- 				Disparo* d=new Disparo();
-				Vector2D pos=hombre.getPos();
-				d->setPos(pos.x,pos.y);
-				disparos.agregar(d);
-				hombre.setVel(0,0);
-				ETSIDI::play("sonidos/disparo.wav");
-				break;
-			}
-		case 'z':
-			{
-				DisparoEspecial* d = new DisparoEspecial();
-				Vector2D pos = hombre.getPos();
-				d->setPos(pos.x, pos.y);
-				disparos.agregar(d);
-				hombre.setVel(0, 0);
-				ETSIDI::play("sonidos/disparo.wav");
-				break;
-			}
 		case '1':	
  			esferas.agregar (new Esfera(0.5f,0,10));
 			break;
@@ -162,7 +128,11 @@ void Mundo::teclaEspecial(unsigned char key)
 	case GLUT_KEY_RIGHT:
 		hombre.setVel (5.0f, 0.0f);
 		break;
+	case GLUT_KEY_UP:
+		hombre.setVelY(10.0f);
+		break;
 	}
+	
 }
 
 bool Mundo::cargarNivel()
@@ -170,11 +140,10 @@ bool Mundo::cargarNivel()
 	nivel++;
 	hombre.setPos(0, 0);
 	esferas.destruirContenido();
-	disparos.destruirContenido();
 	if (nivel == 1)
 	{
 		plataforma.setPos(-5.0f, 9.0f, 5.0f, 9.0f);
-		Esfera *e1 = new Esfera(1.5f, 2, 4, 5, 15);
+		Esfera *e1 = new Esfera(1.5f, 54, 4, 5, 15);
 		e1->setColor(0, 0, 255);
 		esferas.agregar(e1); //esfera
 	}
@@ -183,8 +152,8 @@ bool Mundo::cargarNivel()
 		plataforma.setPos(-3.0f, 6.0f, 3.0f, 6.0f);
 		plataforma.setColor(255, 0, 0);
 		EsferaPulsante* e3 = new EsferaPulsante;
-		e3->setPos(0, 12);
-		e3->setVel(5, 3);
+		e3->setPos(50, 2);
+		e3->setVel(-5, 3);
 		esferas.agregar(e3);
 	}
 	if (nivel == 3)
@@ -193,7 +162,7 @@ bool Mundo::cargarNivel()
 		plataforma.setColor(255, 0, 255);
 		for (int i = 0; i < 5; i++)
 		{
-			Esfera* aux = new Esfera(1.5, -5 + i, 12, i, 5);
+			Esfera* aux = new Esfera(1.5, 50 + i, 12, -i, 5);
 			aux->setColor(i * 40, 0, 255 - i * 40);
 			esferas.agregar(aux);
 		}

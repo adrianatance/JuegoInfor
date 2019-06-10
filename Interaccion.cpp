@@ -12,8 +12,11 @@ Interaccion::~Interaccion(void)
 
 void Interaccion::rebote(Hombre &h, Caja c)
 {
-	float xmax=c.suelo.limite2.x;
-	float xmin=c.suelo.limite1.x;
+	float xmax=c.suelo.limite2.x-2;
+	float xmin=c.suelo.limite1.x+2;
+
+	float ymin = c.pared_dcha.limite1.y;
+
 	if(h.posicion.x>xmax){
 		h.posicion.x=xmax;
 		h.velocidad.x=0;
@@ -22,7 +25,24 @@ void Interaccion::rebote(Hombre &h, Caja c)
 		h.posicion.x=xmin;
 		h.velocidad.x=0;
 	}
+	if (h.posicion.y < ymin) h.posicion.y = ymin;
 }
+
+void Interaccion::rebote(Hombre& h, Pared plataforma) {
+	float ymax = plataforma.limite1.y;
+	if ((h.getPosX() > plataforma.limite1.x) && (h.getPosX() < plataforma.limite2.x)) {
+		if (((ymax - h.getPosY()) < 0.4) && ((ymax - h.getPosY()) > 0.1)) {
+			h.setVelY(0.0);
+		}
+	}
+	if ((h.getPosX() > plataforma.limite1.x) && (h.getPosX() < plataforma.limite2.x)) {
+		if ((ymax < h.getPosY())&&(h.getPosY()<(ymax+0.2))) {
+			h.setVelY(0.0);
+			h.setPosY(ymax + 0.1);
+		}
+	}
+}
+
 void Interaccion::rebote(Esfera& e, Caja c)
 {
 	rebote(e,c.suelo);
@@ -127,30 +147,5 @@ bool Interaccion::colision(Esfera e, Hombre h)
 	float distancia=(e.posicion-pos).modulo();
 	if(distancia<e.radio)
 		return true;	
-	return false;
-}
-bool Interaccion::colision(Disparo d, Pared p)
-{
-	Vector2D pos=d.getPos();
-	float dist=p.distancia(pos);
-	if(dist<d.getRadio())
-		return true;
-	return false;
-}
-bool Interaccion::colision(Disparo d, Caja c)
-{
-	//utilizo la funcion anterior
-	return colision(d,c.techo);
-}
-
-bool Interaccion::colision(Disparo d, Esfera e)
-{
-	Pared aux; //Creamos una pared auxiliar
-	Vector2D p1 = d.posicion;
-	Vector2D p2 = d.origen;
-	aux.setPos(p1.x, p1.y, p2.x, p2.y); //Que coincida con el disparo.
-	float dist = aux.distancia(e.posicion); //para calcular su distancia
-	if (dist < e.radio)
-		return true;
 	return false;
 }

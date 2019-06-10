@@ -9,6 +9,7 @@ Hombre::Hombre():sprite("imagenes/pangPlayer.png",5)
 	sprite.setCenter(1,0);
 	sprite.setSize(2,2);
 	altura=1.8f;
+	aceleracion.y = -9.8f; //hay que aplicarle la gravedad para que se termine de caer siempre y no se quede colgado a una cota superior.
 }
 
 Hombre::~Hombre()
